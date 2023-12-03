@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        STACK_NAME = 'cloudformation'
+        STACK_NAME = 'io-sunny-infra'
         TEMPLATE_FILE = 'development/code.yaml'
 
 }
