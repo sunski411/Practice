@@ -1,0 +1,190 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: A template to deploy vpc and ec2 instance 
+
+Parameters:
+  vpcCidrBlock: 
+    Description: CidrBlock of myVPC 
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/vpcCidrblock
+
+  SubnetCidrBlock: 
+    Description: CidrBlock of mySN 
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/sncidrblock
+
+  AZ: 
+    Description: AZ of my sn
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/az
+
+  ImageID:
+    Description: AMI
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /learning/cloud-solutions/imageid
+
+  InstanceType:
+    Description: My instance type 
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/instancetype
+
+  KeyName:
+    Description: Private key for my instance 
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/keyname
+
+  
+  ResourceName: 
+    Description: Name of my resource
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/ResourceName
+  
+  CostCenter:
+    Description: Cost allocation
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/CostCenter
+
+  MapMigration:
+    Description: Allocating migration Id
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/MapMigration
+
+  ProjectCode:
+    Description: Allocating the project code
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/ProjectCode
+
+  FundingType:
+    Description: Allocating funds
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /learning/cloud-solutions/FundingType
+  
+        
+
+
+Resources:
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref vpcCidrBlock
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: ResourceName
+          Value: !Ref ResourceName
+        - Key: CostCenter
+          Value: !Ref CostCenter
+        - Key: Mapmigration
+          Value: !Ref MapMigration 
+        - Key: ProjectCode
+          Value: !Ref ProjectCode
+        - Key: FundingType
+          Value: !Ref FundingType  
+
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref SubnetCidrBlock
+      VpcId: !Ref MyVPC
+      AvailabilityZone: !Ref AZ
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: ResourceName
+          Value: !Ref ResourceName
+        - Key: CostCenter
+          Value: !Ref CostCenter
+        - Key: Mapmigration
+          Value: !Ref MapMigration 
+        - Key: ProjectCode
+          Value: !Ref ProjectCode
+        - Key: FundingType
+          Value: !Ref FundingType 
+
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: ResourceName
+          Value: !Ref ResourceName
+        - Key: CostCenter
+          Value: !Ref CostCenter
+        - Key: Mapmigration
+          Value: !Ref MapMigration 
+        - Key: ProjectCode
+          Value: !Ref ProjectCode
+        - Key: FundingType
+          Value: !Ref FundingType 
+  
+  AttachGateWay:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for our EC2 instance 
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+          - IpProtocol: tcp 
+            FromPort: 22 
+            ToPort: 22 
+            CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: ResourceName
+          Value: !Ref ResourceName
+        - Key: CostCenter
+          Value: !Ref CostCenter
+        - Key: Mapmigration
+          Value: !Ref MapMigration 
+        - Key: ProjectCode
+          Value: !Ref ProjectCode
+        - Key: FundingType
+          Value: !Ref FundingType  
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageID
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref MySubnet
+      SecurityGroupIds:
+           - !Ref MySecurityGroup
+      KeyName: !Ref KeyName  
+      Tags:
+        - Key: ResourceName
+          Value: !Ref ResourceName
+        - Key: CostCenter
+          Value: !Ref CostCenter
+        - Key: Mapmigration
+          Value: !Ref MapMigration 
+        - Key: ProjectCode
+          Value: !Ref ProjectCode
+        - Key: FundingType
+          Value: !Ref FundingType  
+          
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -ex
+          umask 022
+          exec > >(tee /var/log/user-data.log|logger -t user-data ) 2>&1
+          apt update -y
+          apt install apache2 -y 
+          apt install openjdk-11-jdk -y 
+          # Signal the status from cfn-init - This is signals Cloudformation template
+          cfn-signal -e $? \
+            --stack ${AWS::StackName} \
+            --resource MyEC2Instance  \
+              --region ${AWS::Region}
+  
+Outputs:
+  InstanceId: 
+    Description: ID of the ec2 
+    Value: !Ref MyEC2Instance 
+    Export:
+      Name: 
+        Fn::Sub: ${AWS::StackName}-InstanceId
+
+        

@@ -1,0 +1,24 @@
+pipeline {
+    agent any
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+        STACK_NAME = 'cloudformation'
+        TEMPLATE_FILE = 'development/code.yaml'
+
+}
+    stages {
+      stage('checkout') {
+          steps {
+      git 'https://github.com/sunski411/Practice.git'
+  }
+}
+    stage('deploy cloudformation') {
+  steps {
+     sh 'aws cloudformation deploy --template-file ${TEMPLATE_FILE} --stack-name ${STACK_NAME} --capabilities CAPABILTY_IAM --region ${aws_default_region}'
+     //  sh 'aws cloudformation delete-stack --stack-name ${STACK_NAME}  region ${AWS_DEFAUL_REGION}'
+  }
+}
+
+}
+
+}
