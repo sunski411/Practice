@@ -1,24 +1,27 @@
 pipeline {
     agent any
+
     environment {
-        AWS_DEFAULT_REGION = 'us-east-1'
-        STACK_NAME = 'io-sunny-infra'
-        TEMPLATE_FILE = 'DevOps/mycode.yml'
+        AWS_DEFAULT_REGION = 'us-east-1' 
+        STACK_NAME = 'io-sunny-infra' 
+        TEMPLATE_FILE = 'DevOps/mycode.yml' // Replace with the path to your CloudFormation template file
+        //PARAMETERS_FILE = 'path/to/your/parameters.json' // Replace with the path to your CloudFormation parameters file
+    }
 
-}
     stages {
-      stage('checkout') {
-          steps {
-      git 'https://github.com/sunski411/Practice.git'
-  }
-}
-    
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/sunski411/Practice.git' // Replace with the URL of your Git repository
+            }
+        }
 
- stage('Deploy CloudFormation') {
+        
+
+        stage('Deploy CloudFormation') {
             steps {
                 script {
-                     sh 'aws cloudformation deploy --template-file ${TEMPLATE_FILE} --stack-name ${STACK_NAME} --capabilities CAPABILITY_IAM --region ${AWS_DEFAULT_REGION}'
-                 //  sh 'aws cloudformation delete-stack --stack-name ${STACK_NAME}  --region ${AWS_DEFAULT_REGION}'
+                   //  sh 'aws cloudformation deploy --template-file ${TEMPLATE_FILE} --stack-name ${STACK_NAME} --capabilities CAPABILITY_IAM --region ${AWS_DEFAULT_REGION}'
+                   sh 'aws cloudformation delete-stack --stack-name ${STACK_NAME}  --region ${AWS_DEFAULT_REGION}'
                 }
             }
         }
