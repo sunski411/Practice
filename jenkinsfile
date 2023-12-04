@@ -13,7 +13,7 @@ pipeline {
   }
 }
     stage('deploy cloudformation') {
-  steps {
+        steps {
      sh 'aws cloudformation deploy --template-file ${TEMPLATE_FILE} --stack-name ${STACK_NAME} --capabilities CAPABILTY_IAM --region ${aws_default_region}'
      //  sh 'aws cloudformation delete-stack --stack-name ${STACK_NAME}  region ${AWS_DEFAUL_REGION}'
   }
