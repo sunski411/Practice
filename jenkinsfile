@@ -12,13 +12,15 @@ pipeline {
       git 'https://github.com/sunski411/Practice.git'
   }
 }
-    stage('deploy cloudformation') {
-        steps {
-     sh 'aws cloudformation deploy --template-file ${TEMPLATE_FILE} --stack-name ${STACK_NAME} --capabilities CAPABILTY_IAM --region ${aws_default_region}'
-     //  sh 'aws cloudformation delete-stack --stack-name ${STACK_NAME}  region ${AWS_DEFAUL_REGION}'
-  }
-}
+    
 
-}
-
+ stage('Deploy CloudFormation') {
+            steps {
+                script {
+                   //  sh 'aws cloudformation deploy --template-file ${TEMPLATE_FILE} --stack-name ${STACK_NAME} --capabilities CAPABILITY_IAM --region ${AWS_DEFAULT_REGION}'
+                   sh 'aws cloudformation delete-stack --stack-name ${STACK_NAME}  --region ${AWS_DEFAULT_REGION}'
+                }
+            }
+        }
+    }
 }
