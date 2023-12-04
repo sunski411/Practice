@@ -3,7 +3,7 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
         STACK_NAME = 'io-sunny-infra'
-        TEMPLATE_FILE = 'development/code.yaml'
+        TEMPLATE_FILE = 'devops/code.yaml'
 
 }
     stages {
